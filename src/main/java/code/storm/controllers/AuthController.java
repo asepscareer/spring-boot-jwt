@@ -8,12 +8,12 @@ import code.storm.payload.request.LoginRequest;
 import code.storm.payload.request.SignupRequest;
 import code.storm.payload.response.MessageResponse;
 import code.storm.payload.response.UserInfoResponse;
-import code.storm.repository.RoleRepository;
-import code.storm.repository.UserRepository;
+import code.storm.repositories.RoleRepository;
+import code.storm.repositories.UserRepository;
 import code.storm.security.exception.TokenRefreshException;
 import code.storm.security.jwt.JwtUtils;
-import code.storm.security.services.RefreshTokenService;
-import code.storm.security.services.UserDetailsImpl;
+import code.storm.security.RefreshTokenService;
+import code.storm.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -36,26 +37,41 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-  @Autowired
-  AuthenticationManager authenticationManager;
+
+  private final AuthenticationManager authenticationManager;
+
+  private final UserRepository userRepository;
+
+  private final RoleRepository roleRepository;
+
+  private final PasswordEncoder encoder;
+
+  private final JwtUtils jwtUtils;
+
+  private final RefreshTokenService refreshTokenService;
+
 
   @Autowired
-  UserRepository userRepository;
+  public AuthController( final AuthenticationManager authenticationManager,
+                         final UserRepository userRepository,
+                         final RoleRepository roleRepository,
+                         final PasswordEncoder encoder,
+                         final JwtUtils jwtUtils,
+                         final RefreshTokenService refreshTokenService
 
-  @Autowired
-  RoleRepository roleRepository;
+                         ){
+    this.authenticationManager = authenticationManager;
+    this.userRepository = userRepository;
+    this.roleRepository = roleRepository;
+    this.encoder = encoder;
+    this.jwtUtils = jwtUtils;
+    this.refreshTokenService = refreshTokenService;
 
-  @Autowired
-  PasswordEncoder encoder;
+  }
 
-  @Autowired
-  JwtUtils jwtUtils;
-
-  @Autowired
-  RefreshTokenService refreshTokenService;
 
   @PostMapping("/signin")
-  public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+  public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
     Authentication authentication = authenticationManager
             .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -67,7 +83,7 @@ public class AuthController {
     ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
     List<String> roles = userDetails.getAuthorities().stream()
-            .map(item -> item.getAuthority())
+            .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
     RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
@@ -135,7 +151,7 @@ public class AuthController {
   }
 
   @PostMapping("/refreshtoken")
-  public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
+  public ResponseEntity<MessageResponse> refreshtoken(HttpServletRequest request) {
     String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
 
     if ((refreshToken != null) && (refreshToken.length() > 0)) {
@@ -159,7 +175,7 @@ public class AuthController {
 
 
   @PostMapping("/signout")
-  public ResponseEntity<?> logoutUser() {
+  public ResponseEntity<MessageResponse> logoutUser() {
     Object principle = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (!principle.toString().equals("anonymousUser")) {
       Long userId = ((UserDetailsImpl) principle).getId();

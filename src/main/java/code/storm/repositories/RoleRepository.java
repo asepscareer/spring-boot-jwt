@@ -1,4 +1,4 @@
-package code.storm.repository;
+package code.storm.repositories;
 
 import java.util.Optional;
 

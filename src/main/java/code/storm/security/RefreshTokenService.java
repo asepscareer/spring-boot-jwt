@@ -1,8 +1,8 @@
-package code.storm.security.services;
+package code.storm.security;
 
 import code.storm.models.RefreshToken;
-import code.storm.repository.RefreshTokenRepository;
-import code.storm.repository.UserRepository;
+import code.storm.repositories.RefreshTokenRepository;
+import code.storm.repositories.UserRepository;
 import code.storm.security.exception.TokenRefreshException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,16 +13,26 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+
 @Service
 public class RefreshTokenService {
-    @Value("${storm.app.jwtRefreshExpirationMs}")
-    private Long refreshTokenDurationMs;
+
+    private final  Long refreshTokenDurationMs;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    private final UserRepository userRepository;
+
 
     @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
+    public RefreshTokenService(
 
-    @Autowired
-    private UserRepository userRepository;
+            @Value("${storm.app.jwtRefreshExpirationMs}") Long refreshTokenDurationMs,
+            RefreshTokenRepository refreshTokenRepository,
+            UserRepository userRepository) {
+        this.refreshTokenDurationMs = refreshTokenDurationMs;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.userRepository = userRepository;
+    }
 
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);

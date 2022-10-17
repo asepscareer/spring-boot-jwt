@@ -1,4 +1,4 @@
-package code.storm.security.services;
+package code.storm.security;
 
 import code.storm.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import code.storm.repository.UserRepository;
+import code.storm.repositories.UserRepository;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

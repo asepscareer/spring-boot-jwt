@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import code.storm.security.jwt.AuthEntryPointJwt;
 import code.storm.security.jwt.AuthTokenFilter;
-import code.storm.security.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -66,7 +65,8 @@ public class WebSecurityConfig {
         .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
         .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-        .antMatchers("/api/test/**").permitAll()
+        .antMatchers("/api/test/**")
+            .permitAll()
         .antMatchers(h2ConsolePath + "/**").permitAll()
         .anyRequest().authenticated();
 

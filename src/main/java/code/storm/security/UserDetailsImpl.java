@@ -1,4 +1,4 @@
-package code.storm.security.services;
+package code.storm.security;
 
 import java.util.Collection;
 import java.util.List;

@@ -1,4 +1,4 @@
-package code.storm.repository;
+package code.storm.repositories;
 
 import code.storm.models.RefreshToken;
 import code.storm.models.User;
