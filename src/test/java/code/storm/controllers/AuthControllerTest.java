@@ -1,7 +1,10 @@
 package code.storm.controllers;
 
+import code.storm.models.ERole;
 import code.storm.models.RefreshToken;
+import code.storm.models.Role;
 import code.storm.payload.request.LoginRequest;
+import code.storm.payload.request.SignupRequest;
 import code.storm.payload.response.MessageResponse;
 import code.storm.payload.response.UserInfoResponse;
 import code.storm.repositories.RoleRepository;
@@ -14,7 +17,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseCookie;
@@ -28,10 +30,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +79,70 @@ class AuthControllerTest {
         );
     }
 
-    // AthenticateUser method
+    // Register Username Exist
+    @Test
+    void shouldReturnUsernameExist() {
+
+        SignupRequest req = new SignupRequest();
+        req.setUsername("asepsaputra");
+
+        when(userRepository.existsByUsername(eq(req.getUsername())))
+                .thenReturn(true);
+
+        ResponseEntity<?> actual = controller.registerUser(req);
+
+        assertEquals(400, actual.getStatusCodeValue());
+
+        MessageResponse expectedResp = new MessageResponse("Error: Username is already taken!");
+        assertEquals(expectedResp, actual.getBody());
+    }
+
+    // Register Email Exist
+    @Test
+    void shouldReturnEmailExist() {
+
+        SignupRequest req = new SignupRequest();
+        req.setEmail("asepsaputra@gmail.com");
+
+        when(userRepository.existsByEmail(eq(req.getEmail())))
+                .thenReturn(true);
+
+        ResponseEntity<?> actual = controller.registerUser(req);
+
+        assertEquals(400, actual.getStatusCodeValue());
+
+        MessageResponse expectedResp = new MessageResponse("Error: Email is already in use!");
+        assertEquals(expectedResp, actual.getBody());
+    }
+
+    // Register User Role is Not Found
+    @Test
+    void shouldRoleNotFound() {
+        SignupRequest req = new SignupRequest();
+        req.setUsername("asepsaputra");
+        req.setEmail("asepsaputra@gmail.com");
+        req.setPassword("asepsaputra");
+
+        Throwable throwable = catchThrowable(() -> controller.registerUser(req));
+        assertThat(throwable)
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Error: Role is not found.");
+
+    }
+
+    @Test
+    void shouldRoleDefaultIsUser() {
+        SignupRequest req = new SignupRequest();
+        req.setUsername("asepsaputra");
+        req.setEmail("asepsaputra@gmail.com");
+        req.setPassword("asepsaputra");
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(new Role(ERole.ROLE_USER));
+        assertEquals(1, roles.size());
+    }
+
+        // AthenticateUser method
     @Test
     void shouldReturnUserInfo() {
         LoginRequest req = new LoginRequest();

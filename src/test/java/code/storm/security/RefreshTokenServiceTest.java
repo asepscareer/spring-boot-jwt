@@ -1,11 +1,10 @@
-package code.storm.security.services;
+package code.storm.security;
 
 
 import code.storm.models.RefreshToken;
 import code.storm.models.User;
 import code.storm.repositories.RefreshTokenRepository;
 import code.storm.repositories.UserRepository;
-import code.storm.security.RefreshTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +17,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RefreshTokenServiceTest {
+class RefreshTokenServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;

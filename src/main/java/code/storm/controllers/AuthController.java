@@ -28,9 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -49,7 +47,6 @@ public class AuthController {
   private final JwtUtils jwtUtils;
 
   private final RefreshTokenService refreshTokenService;
-
 
   @Autowired
   public AuthController( final AuthenticationManager authenticationManager,
