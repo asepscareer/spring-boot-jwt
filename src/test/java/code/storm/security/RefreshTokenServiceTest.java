@@ -63,4 +63,14 @@ class RefreshTokenServiceTest {
                 .findByToken(refreshToken.getToken());
     }
 
+    @Test
+    void createRefreshToken() {
+
+    }
+
+    @Test
+    void verifyExpiration() {
+
+    }
+
 }
