@@ -93,7 +93,7 @@ public class AuthController {
             .body(new UserInfoResponse(userDetails.getId(),
                     userDetails.getUsername(),
                     userDetails.getEmail(),
-                    roles));
+                    roles, jwtCookie.getValue()));
   }
 
   @PostMapping("/signup")
@@ -142,9 +142,12 @@ public class AuthController {
     }
 
     user.setRoles(roles);
-    userRepository.save(user);
-
-    return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    try {
+      userRepository.save(user);
+      return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    } catch (Exception e) {
+      return ResponseEntity.ok(new MessageResponse(e.getMessage()));
+    }
   }
 
   @PostMapping("/refreshtoken")
