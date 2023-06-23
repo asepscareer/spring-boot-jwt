@@ -1,0 +1,1 @@
+web: java -Dserver.port=$PORT -jar spring-boot-jwt-0.0.1-SNAPSHOT.jar
