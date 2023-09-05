@@ -149,7 +149,7 @@ class AuthControllerTest {
         req.setUsername("asep");
         req.setPassword("password");
 
-        UserInfoResponse expectedResp = new UserInfoResponse(1L, req.getUsername(), fakeUserDetail.getEmail(), Collections.singletonList("admin"));
+        UserInfoResponse expectedResp = new UserInfoResponse(1L, req.getUsername(), fakeUserDetail.getEmail(), Collections.singletonList("admin"), "eyToken");
 
 
         // Misalkan berhasil autentikasi

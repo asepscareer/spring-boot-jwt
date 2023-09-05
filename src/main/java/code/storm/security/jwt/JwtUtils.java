@@ -1,6 +1,6 @@
 package code.storm.security.jwt;
 
-import java.util.Date;
+import java.util.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -33,12 +33,12 @@ public class JwtUtils {
   private String jwtRefreshCookie;
 
   public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
-    String jwt = generateTokenFromUsername(userPrincipal.getUsername());
+    String jwt = generateTokenFromUsername(userPrincipal.getUsername(), userPrincipal.getId(), userPrincipal.getEmail());
     return generateCookie(jwtCookie, jwt, "/api");
   }
 
   public ResponseCookie generateJwtCookie(User user) {
-    String jwt = generateTokenFromUsername(user.getUsername());
+    String jwt = generateTokenFromUsername(user.getUsername(), user.getId(), user.getEmail());
     return generateCookie(jwtCookie, jwt, "/api");
   }
 
@@ -65,7 +65,13 @@ public class JwtUtils {
   }
 
   public String getUserNameFromJwtToken(String token) {
-    return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+    try {
+      Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+      return claims.get("username").toString();
+    } catch (MalformedJwtException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   public boolean validateJwtToken(String authToken) {
@@ -87,9 +93,17 @@ public class JwtUtils {
     return false;
   }
 
-  public String generateTokenFromUsername(String username) {
+  public String generateTokenFromUsername(String username, Long id, String email) {
+
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("id", id);
+    claims.put("username", username);
+    claims.put("email", email);
+    claims.put("roles", Collections.singletonList("ROLE_ADMIN"));
+
     return Jwts.builder()
             .setSubject(username)
+            .setClaims(claims)
             .setIssuedAt(new Date())
             .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
             .signWith(SignatureAlgorithm.HS512, jwtSecret)
